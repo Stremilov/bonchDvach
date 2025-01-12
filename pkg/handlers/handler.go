@@ -16,7 +16,7 @@ func InitRoutesAndDB() *gin.Engine {
 	{
 		users := api.Group("/users")
 		{
-			users.POST("/", СreateUserHandler)
+			users.POST("/", CreateUserHandler)
 		}
 		boards := api.Group("/boards")
 		{

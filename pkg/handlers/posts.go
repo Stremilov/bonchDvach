@@ -56,6 +56,7 @@ func GetAllPosts(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при получении постов", "details": err.Error()})
 		return
 	}
+
 	defer rows.Close()
 
 	var posts []Post

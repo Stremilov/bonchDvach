@@ -12,7 +12,7 @@ import (
 // @Produce      json
 // @Success      201
 // @Router       /bonchdvach/api/users [post]
-func СreateUserHandler(c *gin.Context) {
+func CreateUserHandler(c *gin.Context) {
 	userIP := c.ClientIP()
 	query := "INSERT INTO users (ip) VALUES ($1)"
 	_, err := db.Exec(query, userIP)
