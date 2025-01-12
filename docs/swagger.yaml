@@ -1,4 +1,8 @@
+basePath: /bonchdvach/api
 info:
   contact: {}
+  description: API сервиса BonchDvach
+  title: BonchDvach API
+  version: "1.0"
 paths: {}
 swagger: "2.0"

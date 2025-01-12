@@ -1,7 +1,11 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "description": "API сервиса BonchDvach",
+        "title": "BonchDvach API",
+        "contact": {},
+        "version": "1.0"
     },
+    "basePath": "/bonchdvach/api",
     "paths": {}
 }

@@ -2,11 +2,17 @@ package main
 
 import (
 	"bonchDvach"
+	_ "bonchDvach/docs"
 	"bonchDvach/pkg/handlers"
 	_ "bonchDvach/pkg/handlers"
 	"log"
 )
 
+// @title           BonchDvach API
+// @version         1.0
+// @description     API сервиса BonchDvach
+
+// @BasePath        /bonchdvach/api
 func main() {
 	server := new(bonchDvach.Server)
 
