@@ -7,5 +7,393 @@
         "version": "1.0"
     },
     "basePath": "/bonchdvach/api",
-    "paths": {}
+    "paths": {
+        "/bonchdvach/api/boards": {
+            "get": {
+                "description": "Возвращает все доски, которые есть в базе данных",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "boards"
+                ],
+                "summary": "Получить все доски",
+                "responses": {
+                    "200": {
+                        "description": "Успешный запрос",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.SuccessGettingBoardsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Непредвиденная ошибка",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.InternalServerErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Создает новую доску и делает запись в БД. При создании новой доски отдает в вебсокет данные: \"event\": \"board_created\", \"data\": {\"name\": BoardRequest.Name, \"description\": BoardRequest.Description}",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "boards"
+                ],
+                "summary": "Создать новую доску",
+                "parameters": [
+                    {
+                        "description": "Информация о доске",
+                        "name": "board",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CreateBoardRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Успешное создание",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.SuccessCreatingResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Ошибка при получении данных",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.BadRequestResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка при создании записи о доске в БД",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.InternalServerErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/bonchdvach/api/posts": {
+            "post": {
+                "description": "Создает новый пост, который принадлежит определенной доске и делает запись в БД. При создании нового поста отдает в вебсокет данные: \"event\": \"post_created\", \"data\": {\"thread_id\": post.ThreadID, \"content\": post.Content}",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Добавить новый пост",
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    },
+                    "400": {
+                        "description": "Ошибка при получении данных",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.BadRequestResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка при вставке поста в БД",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.InternalServerErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/bonchdvach/api/posts/{threadID}": {
+            "get": {
+                "description": "Получает все посты определенного треда",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "posts"
+                ],
+                "summary": "Получить все посты треда",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Thread ID",
+                        "name": "threadID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешное получение постов треда",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.SuccessGettingPostsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.InternalServerErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/bonchdvach/api/threads": {
+            "get": {
+                "description": "add user to the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "threads"
+                ],
+                "summary": "Получить все треды доски",
+                "responses": {
+                    "200": {
+                        "description": "Успешное получение всех тредов",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.SuccessGetThreadsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.InternalServerErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Создает новый тред, принадлежащий определенной доске и делает запись в БД. При создании нового треда отдает в вебсокет данные: \"event\": \"thread_created\", \"data\": {\"title\": thread.Title, \"board_id\": thread.BoardID}",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "threads"
+                ],
+                "summary": "Добавить новый тред",
+                "responses": {
+                    "201": {
+                        "description": "Успешное создание треда",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.SuccessCreateThreadResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Ошибка при получении данных",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.BadRequestResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Ошибка при вставке треда в БД",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.InternalServerErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/bonchdvach/api/users": {
+            "post": {
+                "description": "add user to the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Add new user",
+                "responses": {
+                    "201": {
+                        "description": "Успешное создание пользователя",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.SuccessUserResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "handlers.BadRequestResponse": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "type": "string",
+                    "example": "Какая-то ошибка"
+                },
+                "error": {
+                    "type": "string",
+                    "example": "Ошибка при получении данных"
+                }
+            }
+        },
+        "handlers.Board": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.CreateBoardRequest": {
+            "type": "object",
+            "required": [
+                "description",
+                "name"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string",
+                    "example": "Обсуждение Питерских мотосходок"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Мотоциклы"
+                }
+            }
+        },
+        "handlers.InternalServerErrorResponse": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "type": "string",
+                    "example": "Какая-то ошибка"
+                },
+                "error": {
+                    "type": "string",
+                    "example": "Непредвиденная ошибка"
+                }
+            }
+        },
+        "handlers.Post": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "threadID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.SuccessCreateThreadResponse": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
+        "handlers.SuccessCreatingResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
+        "handlers.SuccessGetThreadsResponse": {
+            "type": "object",
+            "properties": {
+                "success": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "threads": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.Thread"
+                    }
+                }
+            }
+        },
+        "handlers.SuccessGettingBoardsResponse": {
+            "type": "object",
+            "properties": {
+                "boards": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.Board"
+                    }
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
+        "handlers.SuccessGettingPostsResponse": {
+            "type": "object",
+            "properties": {
+                "posts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.Post"
+                    }
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
+        "handlers.SuccessUserResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
+        "handlers.Thread": {
+            "type": "object",
+            "properties": {
+                "boardID": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        }
+    }
 }

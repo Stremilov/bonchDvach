@@ -9,7 +9,10 @@ import (
 
 func InitRoutesAndDB() *gin.Engine {
 	InitDB()
+	InitWebSocketHub()
+
 	router := gin.New()
+
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	api := router.Group("/bonchdvach/api")
@@ -32,6 +35,10 @@ func InitRoutesAndDB() *gin.Engine {
 		{
 			posts.POST("/", CreatePost)
 			posts.GET("/:threadID", GetAllPosts)
+		}
+		ws := api.Group("/ws")
+		{
+			ws.GET("/", WebSocketHandler)
 		}
 
 	}

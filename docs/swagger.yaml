@@ -1,8 +1,270 @@
 basePath: /bonchdvach/api
+definitions:
+  handlers.BadRequestResponse:
+    properties:
+      details:
+        example: Какая-то ошибка
+        type: string
+      error:
+        example: Ошибка при получении данных
+        type: string
+    type: object
+  handlers.Board:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  handlers.CreateBoardRequest:
+    properties:
+      description:
+        example: Обсуждение Питерских мотосходок
+        type: string
+      name:
+        example: Мотоциклы
+        type: string
+    required:
+    - description
+    - name
+    type: object
+  handlers.InternalServerErrorResponse:
+    properties:
+      details:
+        example: Какая-то ошибка
+        type: string
+      error:
+        example: Непредвиденная ошибка
+        type: string
+    type: object
+  handlers.Post:
+    properties:
+      content:
+        type: string
+      id:
+        type: integer
+      threadID:
+        type: integer
+    type: object
+  handlers.SuccessCreateThreadResponse:
+    properties:
+      success:
+        example: success
+        type: string
+    type: object
+  handlers.SuccessCreatingResponse:
+    properties:
+      status:
+        example: success
+        type: string
+    type: object
+  handlers.SuccessGetThreadsResponse:
+    properties:
+      success:
+        example: success
+        type: string
+      threads:
+        items:
+          $ref: '#/definitions/handlers.Thread'
+        type: array
+    type: object
+  handlers.SuccessGettingBoardsResponse:
+    properties:
+      boards:
+        items:
+          $ref: '#/definitions/handlers.Board'
+        type: array
+      status:
+        example: success
+        type: string
+    type: object
+  handlers.SuccessGettingPostsResponse:
+    properties:
+      posts:
+        items:
+          $ref: '#/definitions/handlers.Post'
+        type: array
+      status:
+        example: success
+        type: string
+    type: object
+  handlers.SuccessUserResponse:
+    properties:
+      status:
+        example: success
+        type: string
+    type: object
+  handlers.Thread:
+    properties:
+      boardID:
+        type: integer
+      id:
+        type: integer
+      title:
+        type: string
+    type: object
 info:
   contact: {}
   description: API сервиса BonchDvach
   title: BonchDvach API
   version: "1.0"
-paths: {}
+paths:
+  /bonchdvach/api/boards:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает все доски, которые есть в базе данных
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный запрос
+          schema:
+            $ref: '#/definitions/handlers.SuccessGettingBoardsResponse'
+        "500":
+          description: Непредвиденная ошибка
+          schema:
+            $ref: '#/definitions/handlers.InternalServerErrorResponse'
+      summary: Получить все доски
+      tags:
+      - boards
+    post:
+      consumes:
+      - application/json
+      description: 'Создает новую доску и делает запись в БД. При создании новой доски
+        отдает в вебсокет данные: "event": "board_created", "data": {"name": BoardRequest.Name,
+        "description": BoardRequest.Description}'
+      parameters:
+      - description: Информация о доске
+        in: body
+        name: board
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateBoardRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Успешное создание
+          schema:
+            $ref: '#/definitions/handlers.SuccessCreatingResponse'
+        "400":
+          description: Ошибка при получении данных
+          schema:
+            $ref: '#/definitions/handlers.BadRequestResponse'
+        "500":
+          description: Ошибка при создании записи о доске в БД
+          schema:
+            $ref: '#/definitions/handlers.InternalServerErrorResponse'
+      summary: Создать новую доску
+      tags:
+      - boards
+  /bonchdvach/api/posts:
+    post:
+      consumes:
+      - application/json
+      description: 'Создает новый пост, который принадлежит определенной доске и делает
+        запись в БД. При создании нового поста отдает в вебсокет данные: "event":
+        "post_created", "data": {"thread_id": post.ThreadID, "content": post.Content}'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Ошибка при получении данных
+          schema:
+            $ref: '#/definitions/handlers.BadRequestResponse'
+        "500":
+          description: Ошибка при вставке поста в БД
+          schema:
+            $ref: '#/definitions/handlers.InternalServerErrorResponse'
+      summary: Добавить новый пост
+      tags:
+      - posts
+  /bonchdvach/api/posts/{threadID}:
+    get:
+      consumes:
+      - application/json
+      description: Получает все посты определенного треда
+      parameters:
+      - description: Thread ID
+        in: path
+        name: threadID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешное получение постов треда
+          schema:
+            $ref: '#/definitions/handlers.SuccessGettingPostsResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/handlers.InternalServerErrorResponse'
+      summary: Получить все посты треда
+      tags:
+      - posts
+  /bonchdvach/api/threads:
+    get:
+      consumes:
+      - application/json
+      description: add user to the database
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешное получение всех тредов
+          schema:
+            $ref: '#/definitions/handlers.SuccessGetThreadsResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/handlers.InternalServerErrorResponse'
+      summary: Получить все треды доски
+      tags:
+      - threads
+    post:
+      consumes:
+      - application/json
+      description: 'Создает новый тред, принадлежащий определенной доске и делает
+        запись в БД. При создании нового треда отдает в вебсокет данные: "event":
+        "thread_created", "data": {"title": thread.Title, "board_id": thread.BoardID}'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Успешное создание треда
+          schema:
+            $ref: '#/definitions/handlers.SuccessCreateThreadResponse'
+        "400":
+          description: Ошибка при получении данных
+          schema:
+            $ref: '#/definitions/handlers.BadRequestResponse'
+        "500":
+          description: Ошибка при вставке треда в БД
+          schema:
+            $ref: '#/definitions/handlers.InternalServerErrorResponse'
+      summary: Добавить новый тред
+      tags:
+      - threads
+  /bonchdvach/api/users:
+    post:
+      consumes:
+      - application/json
+      description: add user to the database
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Успешное создание пользователя
+          schema:
+            $ref: '#/definitions/handlers.SuccessUserResponse'
+      summary: Add new user
+      tags:
+      - users
 swagger: "2.0"

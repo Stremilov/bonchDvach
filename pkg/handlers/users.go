@@ -5,12 +5,16 @@ import (
 	"net/http"
 )
 
+type SuccessUserResponse struct {
+	Status string `json:"status" example:"success"`
+}
+
 // @Summary      Add new user
 // @Description  add user to the database
 // @Tags         users
 // @Accept       json
 // @Produce      json
-// @Success      201
+// @Success      201 {object} SuccessUserResponse "Успешное создание пользователя"
 // @Router       /bonchdvach/api/users [post]
 func CreateUserHandler(c *gin.Context) {
 	userIP := c.ClientIP()

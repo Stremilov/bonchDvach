@@ -12,16 +12,25 @@ type Board struct {
 }
 
 type CreateBoardRequest struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name        string `json:"name" example:"Мотоциклы" binding:"required"`
+	Description string `json:"description" example:"Обсуждение Питерских мотосходок" binding:"required"`
+}
+
+type SuccessGettingBoardsResponse struct {
+	Status string  `json:"status" example:"success"`
+	Boards []Board `json:"boards"`
 }
 
 // @Summary      Создать новую доску
-// @Description  Создает новую доску и делает запись в БД
+// @Description  Создает новую доску и делает запись в БД. При создании новой доски отдает в вебсокет данные: "event": "board_created", "data": {"name": BoardRequest.Name, "description": BoardRequest.Description}
 // @Tags         boards
 // @Accept       json
 // @Produce      json
 // @Success      201
+// @Param        board  body      CreateBoardRequest  true  "Информация о доске"
+// @Success      201    {object}  SuccessCreatingResponse   "Успешное создание"
+// @Failure      400    {object}  BadRequestResponse   "Ошибка при получении данных"
+// @Failure      500    {object}  InternalServerErrorResponse   "Ошибка при создании записи о доске в БД"
 // @Router       /bonchdvach/api/boards [post]
 func CreateBoard(c *gin.Context) {
 	var BoardRequest CreateBoardRequest
@@ -39,6 +48,14 @@ func CreateBoard(c *gin.Context) {
 		return
 	}
 
+	wsHub.Broadcast <- gin.H{
+		"event": "board_created",
+		"data": gin.H{
+			"name":        BoardRequest.Name,
+			"description": BoardRequest.Description,
+		},
+	}
+
 	c.JSON(http.StatusCreated, gin.H{"status": "success"})
 }
 
@@ -47,7 +64,8 @@ func CreateBoard(c *gin.Context) {
 // @Tags         boards
 // @Accept       json
 // @Produce      json
-// @Success      201
+// @Success      200 {object} SuccessGettingBoardsResponse "Успешный запрос"
+// @Failure      500    {object}  InternalServerErrorResponse   "Непредвиденная ошибка"
 // @Router       /bonchdvach/api/boards [get]
 func GetBoards(c *gin.Context) {
 	query := "SELECT * FROM boards"

@@ -36,7 +36,7 @@ func InitDB() {
 		);
 		CREATE TABLE IF NOT EXISTS threads (
 			id SERIAL PRIMARY KEY,
-			board_id TEXT NOT NULL,
+			board_id INTEGER NOT NULL,
 			title TEXT NOT NULL,
 			FOREIGN KEY (board_id) REFERENCES boards (id)
 		);
