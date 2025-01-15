@@ -12,7 +12,6 @@ import (
 // @version         1.0
 // @description     API сервиса BonchDvach
 
-// @BasePath        /bonchdvach/api
 func main() {
 	server := new(bonchDvach.Server)
 

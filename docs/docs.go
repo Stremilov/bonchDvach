@@ -409,7 +409,7 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "",
-	BasePath:         "/bonchdvach/api",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "BonchDvach API",
 	Description:      "API сервиса BonchDvach",

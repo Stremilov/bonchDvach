@@ -1,4 +1,3 @@
-basePath: /bonchdvach/api
 definitions:
   handlers.BadRequestResponse:
     properties:

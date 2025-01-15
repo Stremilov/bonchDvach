@@ -6,7 +6,6 @@
         "contact": {},
         "version": "1.0"
     },
-    "basePath": "/bonchdvach/api",
     "paths": {
         "/bonchdvach/api/boards": {
             "get": {
