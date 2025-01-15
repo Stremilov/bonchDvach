@@ -8,10 +8,11 @@ services:
       dockerfile: Dockerfile
     container_name: bonchDvach-backend
     ports:
-      - "8000:8000"
+      - "8001:8000"
     restart: unless-stopped
     networks:
       - skynet
 
 networks:
   skynet:
+    external: true
