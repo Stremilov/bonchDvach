@@ -1,0 +1,26 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main 
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy
+      env:
+        SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+        SSH_HOST: ${{ secrets.SERVER_HOST }}
+        SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y sshpass
+        sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no $SSH_USERNAME@$SSH_HOST '
+          cd ~/bonchdvach/bonchDvach/
+          git pull
+          docker compose -f docker-compose.yml down || true
+          docker compose build --no-cache
+          docker compose -f docker-compose.yml up -d || true
+        '
