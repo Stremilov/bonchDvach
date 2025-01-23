@@ -70,7 +70,7 @@ func CreateThread(c *gin.Context) {
 // @Failure      500    {object}  InternalServerErrorResponse   "Внутренняя ошибка"
 // @Router       /bonchdvach/api/threads/{boardID} [get]
 func GetAllThreads(c *gin.Context) {
-	query := "SELECT * FROM threads WHERE board_id = $1"
+	query := "SELECT id, board_id, title FROM threads WHERE board_id = $1"
 	id := c.Param("boardID")
 	rows, err := db.Query(query, id)
 	if err != nil {
