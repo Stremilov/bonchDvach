@@ -209,24 +209,6 @@ paths:
       tags:
       - posts
   /bonchdvach/api/threads:
-    get:
-      consumes:
-      - application/json
-      description: add user to the database
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Успешное получение всех тредов
-          schema:
-            $ref: '#/definitions/handlers.SuccessGetThreadsResponse'
-        "500":
-          description: Внутренняя ошибка
-          schema:
-            $ref: '#/definitions/handlers.InternalServerErrorResponse'
-      summary: Получить все треды доски
-      tags:
-      - threads
     post:
       consumes:
       - application/json
@@ -249,6 +231,31 @@ paths:
           schema:
             $ref: '#/definitions/handlers.InternalServerErrorResponse'
       summary: Добавить новый тред
+      tags:
+      - threads
+  /bonchdvach/api/threads/{boardID}:
+    get:
+      consumes:
+      - application/json
+      description: get all threads of the board
+      parameters:
+      - description: Board ID
+        in: path
+        name: boardID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешное получение всех тредов
+          schema:
+            $ref: '#/definitions/handlers.SuccessGetThreadsResponse'
+        "500":
+          description: Внутренняя ошибка
+          schema:
+            $ref: '#/definitions/handlers.InternalServerErrorResponse'
+      summary: Получить все треды доски
       tags:
       - threads
   /bonchdvach/api/users:

@@ -65,6 +65,7 @@ func CreateThread(c *gin.Context) {
 // @Tags         threads
 // @Accept       json
 // @Produce      json
+// @Param        boardID path int true "Board ID"
 // @Success      200 	{object} SuccessGetThreadsResponse "Успешное получение всех тредов"
 // @Failure      500    {object}  InternalServerErrorResponse   "Внутренняя ошибка"
 // @Router       /bonchdvach/api/threads/{boardID} [get]

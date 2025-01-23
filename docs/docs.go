@@ -159,33 +159,6 @@ const docTemplate = `{
             }
         },
         "/bonchdvach/api/threads": {
-            "get": {
-                "description": "add user to the database",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "threads"
-                ],
-                "summary": "Получить все треды доски",
-                "responses": {
-                    "200": {
-                        "description": "Успешное получение всех тредов",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.SuccessGetThreadsResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Внутренняя ошибка",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.InternalServerErrorResponse"
-                        }
-                    }
-                }
-            },
             "post": {
                 "description": "Создает новый тред, принадлежащий определенной доске и делает запись в БД. При создании нового треда отдает в вебсокет данные: \"event\": \"thread_created\", \"data\": {\"title\": thread.Title, \"board_id\": thread.BoardID}",
                 "consumes": [
@@ -213,6 +186,44 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Ошибка при вставке треда в БД",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.InternalServerErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/bonchdvach/api/threads/{boardID}": {
+            "get": {
+                "description": "get all threads of the board",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "threads"
+                ],
+                "summary": "Получить все треды доски",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Board ID",
+                        "name": "boardID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешное получение всех тредов",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.SuccessGetThreadsResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка",
                         "schema": {
                             "$ref": "#/definitions/handlers.InternalServerErrorResponse"
                         }
