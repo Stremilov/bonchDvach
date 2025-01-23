@@ -3,8 +3,9 @@ package handlers
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
 	"log"
+
+	_ "github.com/lib/pq"
 )
 
 var db *sql.DB
@@ -12,7 +13,7 @@ var db *sql.DB
 func InitDB() {
 	var err error
 
-	connStr := fmt.Sprintf("host=db user=postgres password=sdgdfs13 dbname=bonchdvach sslmode=disable")
+	connStr := fmt.Sprintf("host=localhost user=postgres password=postgres dbname=bonchdvach sslmode=disable")
 
 	db, err = sql.Open("postgres", connStr)
 	if err != nil {

@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Thread struct {
@@ -60,19 +61,19 @@ func CreateThread(c *gin.Context) {
 }
 
 // @Summary      Получить все треды доски
-// @Description  add user to the database
+// @Description  get all threads of the board
 // @Tags         threads
 // @Accept       json
 // @Produce      json
 // @Success      200 	{object} SuccessGetThreadsResponse "Успешное получение всех тредов"
 // @Failure      500    {object}  InternalServerErrorResponse   "Внутренняя ошибка"
-// @Router       /bonchdvach/api/threads [get]
+// @Router       /bonchdvach/api/threads/{boardID} [get]
 func GetAllThreads(c *gin.Context) {
-	query := "SELECT * FROM threads"
-
-	rows, err := db.Query(query)
+	query := "SELECT * FROM threads WHERE board_id = $1"
+	id := c.Param("boardID")
+	rows, err := db.Query(query, id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при получении досок", "details": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при получении тредов", "details": err.Error()})
 		return
 	}
 
