@@ -2,11 +2,12 @@ package handlers
 
 import (
 	_ "bonchDvach/docs"
+	"time"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"time"
 )
 
 func InitRoutesAndDB() *gin.Engine {
@@ -43,7 +44,7 @@ func InitRoutesAndDB() *gin.Engine {
 		threads := api.Group("/threads")
 		{
 			threads.POST("/", CreateThread)
-			threads.GET("/", GetAllThreads)
+			threads.GET("/:boardID", GetAllThreads)
 		}
 		posts := api.Group("/posts")
 		{
