@@ -1,24 +1,39 @@
 package handlers
 
 import (
-	"github.com/gin-gonic/gin"
+	"bonchDvach/pkg/models"
+	ws "bonchDvach/pkg/websockets"
+	"context"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
-type Post struct {
-	ID       int    `json:"id"`
-	ThreadID int    `json:"threadID"`
-	Content  string `json:"content"`
+type PostRepository interface {
+	GetAllPosts(ctx context.Context, threadID string) ([]models.Post, error)
+	CreatePost(ctx context.Context, threadID string, content string) error
 }
 
 type CreatePostRequest struct {
-	ThreadID int    `json:"threadID" binding:"required"`
+	ThreadID string `json:"threadID" binding:"required"`
 	Content  string `json:"content" binding:"required"`
 }
 
 type SuccessGettingPostsResponse struct {
-	Status string `json:"status" example:"success"`
-	Posts  []Post `json:"posts"`
+	Status string        `json:"status" example:"success"`
+	Posts  []models.Post `json:"posts"`
+}
+
+type PostHandler struct {
+	repo  PostRepository
+	wsHub *ws.Hub
+}
+
+func NewPostHandler(repo PostRepository, wsHub *ws.Hub) PostHandler {
+	return PostHandler{
+		repo:  repo,
+		wsHub: wsHub,
+	}
 }
 
 // @Summary      Добавить новый пост
@@ -30,7 +45,8 @@ type SuccessGettingPostsResponse struct {
 // @Failure 	 400 {object} BadRequestResponse "Ошибка при получении данных"
 // @Failure 	 500 {object} InternalServerErrorResponse "Ошибка при вставке поста в БД"
 // @Router       /bonchdvach/api/posts [post]
-func CreatePost(c *gin.Context) {
+func (h PostHandler) CreatePost(c *gin.Context) {
+	ctx := context.Background()
 	var post CreatePostRequest
 
 	if err := c.ShouldBindJSON(&post); err != nil {
@@ -38,13 +54,12 @@ func CreatePost(c *gin.Context) {
 		return
 	}
 
-	query := "INSERT INTO posts (thread_id, content) VALUES ($1, $2)"
-	if _, err := db.Exec(query, post.ThreadID, post.Content); err != nil {
+	if err := h.repo.CreatePost(ctx, post.ThreadID, post.Content); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при вставке поста в БД", "details": err.Error()})
 		return
 	}
 
-	wsHub.Broadcast <- gin.H{
+	h.wsHub.Broadcast <- gin.H{
 		"event": "post_created",
 		"data": gin.H{
 			"thread_id": post.ThreadID,
@@ -64,30 +79,13 @@ func CreatePost(c *gin.Context) {
 // @Success      200 {object} SuccessGettingPostsResponse "Успешное получение постов треда"
 // @Failure 	 500 {object} InternalServerErrorResponse "Внутренняя ошибка"
 // @Router       /bonchdvach/api/posts/{threadID} [get]
-func GetAllPosts(c *gin.Context) {
+func (h PostHandler) GetAllPosts(c *gin.Context) {
+	ctx := context.Background()
 	threadID := c.Param("threadID")
-	query := "SELECT * FROM posts WHERE thread_id = $1"
 
-	rows, err := db.Query(query, threadID)
+	posts, err := h.repo.GetAllPosts(ctx, threadID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при получении постов", "details": err.Error()})
-		return
-	}
-
-	defer rows.Close()
-
-	var posts []Post
-	for rows.Next() {
-		var p Post
-		if err := rows.Scan(&p.ID, &p.ThreadID, &p.Content); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при получении записи о посте", "details": err.Error()})
-			return
-		}
-		posts = append(posts, p)
-	}
-
-	if err := rows.Err(); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при завершении обработки постов", "details": err.Error()})
 		return
 	}
 

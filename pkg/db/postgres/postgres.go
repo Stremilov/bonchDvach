@@ -10,15 +10,11 @@ import (
 	"github.com/pressly/goose/v3"
 )
 
-type Postgres struct {
-	Pool *pgxpool.Pool
-}
-
 const (
 	pathToMigrations = "./migrations"
 )
 
-func New(connString string) (*Postgres, error) {
+func New(connString string) (*pgxpool.Pool, error) {
 	ctx := context.Background()
 
 	config, _ := pgxpool.ParseConfig(connString)
@@ -39,7 +35,7 @@ func New(connString string) (*Postgres, error) {
 		return nil, fmt.Errorf("cannot apply migrations: %w", err)
 	}
 
-	return &Postgres{Pool: pool}, nil
+	return pool, nil
 }
 
 func applyMigrations(pool *pgxpool.Pool) error {
@@ -60,5 +56,3 @@ func applyMigrations(pool *pgxpool.Pool) error {
 
 	return nil
 }
-
-//Методы для работы с БД

@@ -1,10 +1,11 @@
-package handlers
+package router
 
 import (
 	ws "bonchDvach/pkg/websockets"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"net/http"
 )
 
 var wsHub = ws.NewHub()
