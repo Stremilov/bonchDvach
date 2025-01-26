@@ -1,19 +1,21 @@
 package handlers
 
 import (
+	"bonchDvach/pkg/models"
+	ws "bonchDvach/pkg/websockets"
+	"context"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-type Thread struct {
-	ID      int    `json:"id"`
-	BoardID int    `json:"boardID"`
-	Title   string `json:"title"`
+type ThreadRepository interface {
+	GetAllThreads(ctx context.Context, boardID string) ([]models.Thread, error)
+	CreateThread(ctx context.Context, title string, boardID string) error
 }
 
 type CreateThreadRequest struct {
-	BoardID int    `json:"boardID" binding:"required"`
+	BoardID string `json:"boardID" binding:"required"`
 	Title   string `json:"title" binding:"required"`
 }
 
@@ -22,8 +24,20 @@ type SuccessCreateThreadResponse struct {
 }
 
 type SuccessGetThreadsResponse struct {
-	Success string   `json:"success" example:"success"`
-	Threads []Thread `json:"threads"`
+	Success string          `json:"success" example:"success"`
+	Threads []models.Thread `json:"threads"`
+}
+
+type ThreadsHandler struct {
+	repo  ThreadRepository
+	wsHub *ws.Hub
+}
+
+func NewThreadHandler(repo ThreadRepository, wsHub *ws.Hub) ThreadsHandler {
+	return ThreadsHandler{
+		repo:  repo,
+		wsHub: wsHub,
+	}
 }
 
 // @Summary      Добавить новый тред
@@ -35,7 +49,8 @@ type SuccessGetThreadsResponse struct {
 // @Failure      400    {object}  BadRequestResponse   "Ошибка при получении данных"
 // @Failure      500    {object}  InternalServerErrorResponse   "Ошибка при вставке треда в БД"
 // @Router       /bonchdvach/api/threads [post]
-func CreateThread(c *gin.Context) {
+func (h ThreadsHandler) CreateThread(c *gin.Context) {
+	ctx := c.Request.Context()
 	var thread CreateThreadRequest
 
 	if err := c.ShouldBindJSON(&thread); err != nil {
@@ -43,13 +58,12 @@ func CreateThread(c *gin.Context) {
 		return
 	}
 
-	query := "INSERT INTO threads (title, board_id) VALUES ($1, $2)"
-	if _, err := db.Exec(query, thread.Title, thread.BoardID); err != nil {
+	if err := h.repo.CreateThread(ctx, thread.Title, thread.BoardID); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при вставке треда в БД", "details": err.Error()})
 		return
 	}
 
-	wsHub.Broadcast <- gin.H{
+	h.wsHub.Broadcast <- gin.H{
 		"event": "thread_created",
 		"data": gin.H{
 			"title":    thread.Title,
@@ -69,25 +83,14 @@ func CreateThread(c *gin.Context) {
 // @Success      200 	{object} SuccessGetThreadsResponse "Успешное получение всех тредов"
 // @Failure      500    {object}  InternalServerErrorResponse   "Внутренняя ошибка"
 // @Router       /bonchdvach/api/threads/{boardID} [get]
-func GetAllThreads(c *gin.Context) {
-	query := "SELECT id, board_id, title FROM threads WHERE board_id = $1"
-	id := c.Param("boardID")
-	rows, err := db.Query(query, id)
+func (h ThreadsHandler) GetAllThreads(c *gin.Context) {
+	ctx := context.Background()
+	boardID := c.Param("boardID")
+
+	threads, err := h.repo.GetAllThreads(ctx, boardID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при получении тредов", "details": err.Error()})
 		return
-	}
-
-	defer rows.Close()
-
-	var threads []Thread
-	for rows.Next() {
-		var t Thread
-		if err := rows.Scan(&t.ID, &t.BoardID, &t.Title); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при получении записи о треде", "details": err.Error()})
-			return
-		}
-		threads = append(threads, t)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "success", "data": threads})

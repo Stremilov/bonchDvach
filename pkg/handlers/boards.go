@@ -1,14 +1,17 @@
 package handlers
 
 import (
-	"github.com/gin-gonic/gin"
+	"bonchDvach/pkg/models"
+	ws "bonchDvach/pkg/websockets"
+	"context"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
-type Board struct {
-	ID          int    `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
+type BoardRepository interface {
+	CreateBoard(ctx context.Context, name string, description string) error
+	GetBoards(ctx context.Context) ([]models.Board, error)
 }
 
 type CreateBoardRequest struct {
@@ -17,8 +20,20 @@ type CreateBoardRequest struct {
 }
 
 type SuccessGettingBoardsResponse struct {
-	Status string  `json:"status" example:"success"`
-	Boards []Board `json:"boards"`
+	Status string         `json:"status" example:"success"`
+	Boards []models.Board `json:"boards"`
+}
+
+type BoardHandler struct {
+	repo  BoardRepository
+	wsHub *ws.Hub
+}
+
+func NewBoardHandler(repository BoardRepository, wsHub *ws.Hub) BoardHandler {
+	return BoardHandler{
+		repo:  repository,
+		wsHub: wsHub,
+	}
 }
 
 // @Summary      Создать новую доску
@@ -32,23 +47,22 @@ type SuccessGettingBoardsResponse struct {
 // @Failure      400    {object}  BadRequestResponse   "Ошибка при получении данных"
 // @Failure      500    {object}  InternalServerErrorResponse   "Ошибка при создании записи о доске в БД"
 // @Router       /bonchdvach/api/boards [post]
-func CreateBoard(c *gin.Context) {
+func (h BoardHandler) CreateBoard(c *gin.Context) {
 	var BoardRequest CreateBoardRequest
+	ctx := c.Request.Context()
 
 	if err := c.ShouldBindJSON(&BoardRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Ошибка при получении данных", "details": err.Error()})
 		return
 	}
 
-	query := "INSERT INTO boards (name, description) VALUES ($1, $2)"
-
-	_, err := db.Exec(query, BoardRequest.Name, BoardRequest.Description)
+	err := h.repo.CreateBoard(ctx, BoardRequest.Name, BoardRequest.Description)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при создании записи о доске в БД", "details": err.Error()})
 		return
 	}
 
-	wsHub.Broadcast <- gin.H{
+	h.wsHub.Broadcast <- gin.H{
 		"event": "board_created",
 		"data": gin.H{
 			"name":        BoardRequest.Name,
@@ -67,25 +81,13 @@ func CreateBoard(c *gin.Context) {
 // @Success      200 {object} SuccessGettingBoardsResponse "Успешный запрос"
 // @Failure      500    {object}  InternalServerErrorResponse   "Непредвиденная ошибка"
 // @Router       /bonchdvach/api/boards [get]
-func GetBoards(c *gin.Context) {
-	query := "SELECT * FROM boards"
-	rows, err := db.Query(query)
+func (h BoardHandler) GetBoards(c *gin.Context) {
+	ctx := context.Background()
+
+	boards, err := h.repo.GetBoards(ctx)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при получении досок", "details": err.Error()})
 		return
-	}
-
-	defer rows.Close()
-
-	var boards []Board
-	for rows.Next() {
-		var b Board
-		if err := rows.Scan(&b.ID, &b.Name, &b.Description); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка при получении записи о доске", "details": err.Error()})
-			return
-		}
-
-		boards = append(boards, b)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"status": "success", "data": boards})
