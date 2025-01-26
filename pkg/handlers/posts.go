@@ -46,7 +46,7 @@ func NewPostHandler(repo PostRepository, wsHub *ws.Hub) PostHandler {
 // @Failure 	 500 {object} InternalServerErrorResponse "Ошибка при вставке поста в БД"
 // @Router       /bonchdvach/api/posts [post]
 func (h PostHandler) CreatePost(c *gin.Context) {
-	ctx := context.Background()
+	ctx := c.Request.Context()
 	var post CreatePostRequest
 
 	if err := c.ShouldBindJSON(&post); err != nil {

@@ -49,7 +49,7 @@ func NewBoardHandler(repository BoardRepository, wsHub *ws.Hub) BoardHandler {
 // @Router       /bonchdvach/api/boards [post]
 func (h BoardHandler) CreateBoard(c *gin.Context) {
 	var BoardRequest CreateBoardRequest
-	ctx := context.Background()
+	ctx := c.Request.Context()
 
 	if err := c.ShouldBindJSON(&BoardRequest); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Ошибка при получении данных", "details": err.Error()})

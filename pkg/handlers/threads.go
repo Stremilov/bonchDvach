@@ -50,7 +50,7 @@ func NewThreadHandler(repo ThreadRepository, wsHub *ws.Hub) ThreadsHandler {
 // @Failure      500    {object}  InternalServerErrorResponse   "Ошибка при вставке треда в БД"
 // @Router       /bonchdvach/api/threads [post]
 func (h ThreadsHandler) CreateThread(c *gin.Context) {
-	ctx := context.Background()
+	ctx := c.Request.Context()
 	var thread CreateThreadRequest
 
 	if err := c.ShouldBindJSON(&thread); err != nil {

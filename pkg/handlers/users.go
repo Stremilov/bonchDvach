@@ -34,7 +34,7 @@ func NewUserHandler(repo UserRepository) UserHandler {
 // @Success      201 {object} SuccessUserResponse "Успешное создание пользователя"
 // @Router       /bonchdvach/api/users [post]
 func (h UserHandler) CreateUser(c *gin.Context) {
-	ctx := context.Background()
+	ctx := c.Request.Context()
 	userIP := c.ClientIP()
 
 	err := h.repo.CreateUser(ctx, userIP)
