@@ -1,28 +1,29 @@
 package entities
 
 import (
+	"bonchDvach/pkg/handlers"
 	"bonchDvach/pkg/models"
 	"context"
-	"log"
+	"fmt"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-type BoardRepository struct {
+type BoardStorage struct {
 	db *pgxpool.Pool
 }
 
-func NewBoardRepository(db *pgxpool.Pool) *BoardRepository {
-	return &BoardRepository{
+func NewBoardRepository(db *pgxpool.Pool) handlers.BoardRepository {
+	return &BoardStorage{
 		db: db,
 	}
 }
 
-func (r *BoardRepository) GetBoards(ctx context.Context) ([]models.Board, error) {
+func (r *BoardStorage) GetBoards(ctx context.Context) ([]models.Board, error) {
 	query := "SELECT id, name, description FROM boards"
 	rows, err := r.db.Query(ctx, query)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("cannot get boards: %w", err)
 	}
 	defer rows.Close()
 
@@ -30,17 +31,21 @@ func (r *BoardRepository) GetBoards(ctx context.Context) ([]models.Board, error)
 	for rows.Next() {
 		var b models.Board
 		if err := rows.Scan(&b.ID, &b.Name, &b.Description); err != nil {
-			log.Println(err)
+			return nil, fmt.Errorf("cannot scan rows: %w", err)
 		}
 
 		boards = append(boards, b)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("error while scanning rows: %w", err)
 	}
 
 	return boards, nil
 
 }
 
-func (r *BoardRepository) CreateBoard(ctx context.Context, name string, description string) error {
+func (r *BoardStorage) CreateBoard(ctx context.Context, name string, description string) error {
 	query := "INSERT INTO boards (name, description) VALUES ($1, $2)"
 
 	_, err := r.db.Exec(ctx, query, name, description)
