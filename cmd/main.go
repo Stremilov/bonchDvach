@@ -3,8 +3,7 @@ package main
 import (
 	"bonchDvach"
 	_ "bonchDvach/docs"
-	"bonchDvach/pkg/handlers"
-	_ "bonchDvach/pkg/handlers"
+	"bonchDvach/pkg/router"
 	"log"
 )
 
@@ -15,7 +14,7 @@ import (
 func main() {
 	server := new(bonchDvach.Server)
 
-	if err := server.Run("8000", handlers.InitRoutesAndDB()); err != nil {
+	if err := server.Run("8000", router.InitRoutesAndDB()); err != nil {
 		log.Fatalf("Error running server: %v", err)
 	}
 }
