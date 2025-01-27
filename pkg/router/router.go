@@ -5,6 +5,7 @@ import (
 	"bonchDvach/pkg/db/postgres"
 	"bonchDvach/pkg/db/postgres/entities"
 	"bonchDvach/pkg/handlers"
+	"log"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -14,7 +15,10 @@ import (
 )
 
 func InitRoutesAndDB() *gin.Engine {
-	reps := initDB()
+	reps, err := initDB()
+	if err != nil {
+		log.Fatalf("cannot init db: %v", err)
+	}
 
 	bh := handlers.NewBoardHandler(reps.BoardRepository, wsHub)
 	ph := handlers.NewPostHandler(reps.PostRepository, wsHub)
@@ -77,13 +81,15 @@ type repostitories struct {
 	UserRepository   handlers.UserRepository
 }
 
-func initDB() (reps repostitories) {
-	pool, _ := postgres.New("host=db user=postgres password=postgres dbname=bonchdvach sslmode=disable")
-
+func initDB() (reps repostitories, err error) {
+	pool, err := postgres.New("host=localhost user=postgres password=postgres dbname=bonchdvach sslmode=disable")
+	if err != nil {
+		return reps, err
+	}
 	reps.BoardRepository = entities.NewBoardRepository(pool)
 	reps.PostRepository = entities.NewPostRepository(pool)
 	reps.ThreadRepository = entities.NewThreadRepository(pool)
 	reps.UserRepository = entities.NewUserRepository(pool)
 
-	return reps
+	return reps, nil
 }
