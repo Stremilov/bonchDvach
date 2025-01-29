@@ -1,4 +1,4 @@
-package entities
+package repositories
 
 import (
 	"bonchDvach/pkg/handlers"

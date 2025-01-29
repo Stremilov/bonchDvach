@@ -3,7 +3,7 @@ package router
 import (
 	_ "bonchDvach/docs"
 	"bonchDvach/pkg/db/postgres"
-	"bonchDvach/pkg/db/postgres/entities"
+	"bonchDvach/pkg/db/postgres/repositories"
 	"bonchDvach/pkg/handlers"
 	"log"
 	"time"
@@ -86,10 +86,10 @@ func initDB() (reps repostitories, err error) {
 	if err != nil {
 		return reps, err
 	}
-	reps.BoardRepository = entities.NewBoardRepository(pool)
-	reps.PostRepository = entities.NewPostRepository(pool)
-	reps.ThreadRepository = entities.NewThreadRepository(pool)
-	reps.UserRepository = entities.NewUserRepository(pool)
+	reps.BoardRepository = repositories.NewBoardRepository(pool)
+	reps.PostRepository = repositories.NewPostRepository(pool)
+	reps.ThreadRepository = repositories.NewThreadRepository(pool)
+	reps.UserRepository = repositories.NewUserRepository(pool)
 
 	return reps, nil
 }
