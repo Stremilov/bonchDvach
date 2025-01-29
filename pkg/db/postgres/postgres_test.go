@@ -9,7 +9,7 @@ import (
 )
 
 func TestMigrate(t *testing.T) {
-	pool, err := postgres.New("host=localhost user=postgres password=postgres dbname=bonchdvach sslmode=disable")
+	pool, err := postgres.New("-")
 	if err != nil {
 		t.Fatal(err)
 	}
