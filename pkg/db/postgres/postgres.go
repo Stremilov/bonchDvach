@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	pathToMigrations = "./migrations"
+	pathToMigrations = "./pkg/db/postgres/migrations"
 )
 
 func New(connString string) (*pgxpool.Pool, error) {

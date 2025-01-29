@@ -1,4 +1,4 @@
-package entities
+package repositories
 
 import (
 	"bonchDvach/pkg/handlers"
@@ -41,7 +41,7 @@ func (r PostStorage) GetAllPosts(ctx context.Context, threadID string) ([]models
 		return nil, fmt.Errorf("error while scanning rows: %w", err)
 	}
 
-	return []models.Post{}, nil
+	return posts, nil
 }
 
 func (r PostStorage) CreatePost(ctx context.Context, threadID string, content string) error {
