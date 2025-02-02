@@ -5,13 +5,17 @@ import (
 	"bonchDvach/pkg/db/postgres"
 	"bonchDvach/pkg/db/postgres/repositories"
 	"bonchDvach/pkg/handlers"
+	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+
+	_ "github.com/joho/godotenv/autoload"
 )
 
 func InitRoutesAndDB() *gin.Engine {
@@ -82,7 +86,13 @@ type repostitories struct {
 }
 
 func initDB() (reps repostitories, err error) {
-	pool, err := postgres.New("host=localhost user=postgres password=postgres dbname=bonchdvach sslmode=disable")
+	host := os.Getenv("DB_HOST")
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbName := os.Getenv("DB_NAME")
+	sslMode := os.Getenv("DB_SSLMODE")
+
+	pool, err := postgres.New(fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=%s", host, user, password, dbName, sslMode))
 	if err != nil {
 		return reps, err
 	}
