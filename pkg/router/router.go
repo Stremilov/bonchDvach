@@ -92,6 +92,12 @@ func initDB() (reps repostitories, err error) {
 	dbName := os.Getenv("DB_NAME")
 	sslMode := os.Getenv("DB_SSLMODE")
 
+	if host == "" || user == "" || password == "" || dbName == "" || sslMode == "" {
+		//init default values for db (will be transfered into config.y)
+		host, user, password, dbName, sslMode = "localhost", "postgres", "postgres", "bonchdvach", "disable"
+
+	}
+
 	pool, err := postgres.New(fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=%s", host, user, password, dbName, sslMode))
 	if err != nil {
 		return reps, err
